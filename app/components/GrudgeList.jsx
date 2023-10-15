@@ -1,0 +1,86 @@
+"use client";
+import { Button, TextField } from "@mui/material";
+import { useReducer, useState } from "react";
+
+function grudgeReducer(state, action) {
+  console.log({ state, action });
+  if (action.type === "ADD") {
+    return [...state, action.payload];
+  }
+  if (action.type === "REMOVE") {
+    return state.filter((grudge) => grudge.id !== action.payload.id);
+  }
+  if (action.type === "CLEAR") {
+    return [];
+  }
+  return [];
+}
+
+export default function GrudgeList() {
+  const [grudges, dispatch] = useReducer(grudgeReducer, []);
+  const [inputValue, setInputValue] = useState("");
+
+  console.log({ grudges });
+
+  const title = grudges.length > 0 ? "Grudges List" : "Add Some Grudges";
+
+  function deleteGrudge(grudge) {
+    dispatch({ type: "REMOVE", payload: grudge });
+  }
+
+  function clearGrudges() {
+    dispatch({ type: "CLEAR" });
+  }
+
+  function addGrudge() {
+    if (!inputValue) return;
+    dispatch({ type: "ADD", payload: { text: inputValue, id: Math.random() } });
+    setInputValue("");
+  }
+
+  return (
+    <div style={{ margin: "20px" }}>
+      <h3 data-test="list-header" style={{ margin: "20px 0px" }}>
+        {title}
+      </h3>
+      <div>
+        <TextField
+          data-test="list-input"
+          label="Add Grudge"
+          variant="filled"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          style={{ backgroundColor: "white" }}
+        />
+      </div>
+      <Button data-test="add-to-list-button" onClick={addGrudge}>
+        Add Grudge
+      </Button>
+      <ul
+        data-test="list-of-added-items"
+        style={{ color: "white", listStyleType: "none" }}
+      >
+        {grudges.length > 0 &&
+          grudges.map((g, index) => {
+            console.log("g: ", g);
+            return (
+              <li data-test={`list-item-${g.id}`} key={g.id}>
+                <span>{g.text}</span>
+                <Button
+                  data-test={`delete-list-item-${index + 1}`}
+                  onClick={() => deleteGrudge(g)}
+                >
+                  X
+                </Button>
+              </li>
+            );
+          })}
+      </ul>
+      {grudges.length > 0 && (
+        <Button data-test="clear-list-button" onClick={clearGrudges}>
+          Clear
+        </Button>
+      )}
+    </div>
+  );
+}
